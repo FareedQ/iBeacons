@@ -128,4 +128,23 @@ extension ItemsViewController: UITableViewDelegate {
 
 // MARK: - CLLocationManagerDelegate
 extension ItemsViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
+        print("Failed monitoring region: \(error.localizedDescription)")
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location manager failed: \(error.localizedDescription)")
+    }
+    
+    private func locationManager(manager: CLLocationManager!, didRangeBeacons beacons: [AnyObject]!, inRegion region: CLBeaconRegion!) {
+        if let beacons = beacons as? [CLBeacon] {
+            for beacon in beacons {
+                for item in items {
+                    if item == beacon {
+                        item.lastSeenBeacon = beacon
+                    }
+                }
+            }
+        }
+    }
 }

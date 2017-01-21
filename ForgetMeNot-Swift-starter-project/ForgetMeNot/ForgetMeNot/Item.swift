@@ -8,11 +8,18 @@ struct ItemConstant {
   static let minorKey = "minor"
 }
 
+func ==(item: Item, beacon: CLBeacon) -> Bool {
+    return ((beacon.proximityUUID.uuidString == item.uuid.uuidString)
+        && (Int(beacon.major) == Int(item.majorValue))
+        && (Int(beacon.minor) == Int(item.minorValue)))
+}
+
 class Item: NSObject, NSCoding {
   let name: String
   let uuid: UUID
     let majorValue: CLBeaconMajorValue
     let minorValue: CLBeaconMinorValue
+    dynamic var lastSeenBeacon: CLBeacon?
   
   init(name: String, uuid: UUID, majorValue: CLBeaconMajorValue, minorValue: CLBeaconMajorValue) {
     self.name = name
