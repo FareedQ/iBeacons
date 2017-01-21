@@ -7,38 +7,50 @@ class AddItemViewController: UITableViewController {
   @IBOutlet weak var majorIdTextField: UITextField!
   @IBOutlet weak var minorIdTextField: UITextField!
   
-  var uuidRegex = NSRegularExpression(pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", options: .CaseInsensitive, error: nil)!
   var nameFieldValid = false
   var UUIDFieldValid = false
   var newItem: Item?
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    saveBarButtonItem.enabled = false
+    saveBarButtonItem.isEnabled = false
     
-    nameTextField.addTarget(self, action: "nameTextFieldChanged:", forControlEvents: .EditingChanged)
-    uuidTextField.addTarget(self, action: "uuidTextFieldChanged:", forControlEvents: .EditingChanged)
+    nameTextField.addTarget(self, action: #selector(AddItemViewController.nameTextFieldChanged(_:)), for: .editingChanged)
+    uuidTextField.addTarget(self, action: #selector(AddItemViewController.uuidTextFieldChanged(_:)), for: .editingChanged)
   }
   
-  func nameTextFieldChanged(textField: UITextField) {
-    nameFieldValid = (count(textField.text) > 0)
-    saveBarButtonItem.enabled = (UUIDFieldValid && nameFieldValid)
+  func nameTextFieldChanged(_ textField: UITextField) {
+    nameFieldValid = (textField.text!.characters.count > 0)
+    saveBarButtonItem.isEnabled = (UUIDFieldValid && nameFieldValid)
   }
   
-  func uuidTextFieldChanged(textField: UITextField) {
-    let numberOfMatches = uuidRegex.numberOfMatchesInString(textField.text, options: nil, range: NSMakeRange(0, count(textField.text)))
+  func uuidTextFieldChanged(_ textField: UITextField) {
+    let numberOfMatches = numberOfMatchesInString(textField.text!)
     UUIDFieldValid = (numberOfMatches > 0)
     
-    saveBarButtonItem.enabled = (UUIDFieldValid && nameFieldValid)
+    saveBarButtonItem.isEnabled = (UUIDFieldValid && nameFieldValid)
   }
+    
+    func numberOfMatchesInString(_ string:String) -> Int {
+        do {
+            let pattern = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+            let regex = try NSRegularExpression(pattern: pattern)
+            let nsString = string as NSString
+            let results = regex.numberOfMatches(in: string, range: NSRange(location: 0, length: nsString.length))
+            return results
+        } catch let error {
+            print("invalid regex: \(error.localizedDescription)")
+            return -1
+        }
+    }
   
-  override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     if segue.identifier == "SaveItemSegue" {
-      let uuid = NSUUID(UUIDString: uuidTextField.text)
-      let major = UInt16(majorIdTextField.text.toInt()!)
-      let minor = UInt16(minorIdTextField.text.toInt()!)
+      let uuid = UUID(uuidString: uuidTextField.text!)
+      let major = UInt16(Int(majorIdTextField.text!)!)
+      let minor = UInt16(Int(minorIdTextField.text!)!)
       
-      newItem = Item(name: nameTextField.text, uuid: uuid!, majorValue: major, minorValue: minor)
+      newItem = Item(name: nameTextField.text!, uuid: uuid!, majorValue: major, minorValue: minor)
     }
   }
 }

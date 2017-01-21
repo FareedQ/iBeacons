@@ -9,11 +9,11 @@ struct ItemConstant {
 
 class Item: NSObject, NSCoding {
   let name: String
-  let uuid: NSUUID
+  let uuid: UUID
   let majorValue: UInt16
   let minorValue: UInt16
   
-  init(name: String, uuid: NSUUID, majorValue: UInt16, minorValue: UInt16) {
+  init(name: String, uuid: UUID, majorValue: UInt16, minorValue: UInt16) {
     self.name = name
     self.uuid = uuid
     self.majorValue = majorValue
@@ -22,26 +22,26 @@ class Item: NSObject, NSCoding {
 
   // MARK: NSCoding
   required init(coder aDecoder: NSCoder) {
-    if let aName = aDecoder.decodeObjectForKey(ItemConstant.nameKey) as? String {
+    if let aName = aDecoder.decodeObject(forKey: ItemConstant.nameKey) as? String {
       name = aName
     }
     else {
       name = ""
     }
-    if let aUUID = aDecoder.decodeObjectForKey(ItemConstant.uuidKey) as? NSUUID {
+    if let aUUID = aDecoder.decodeObject(forKey: ItemConstant.uuidKey) as? UUID {
       uuid = aUUID
     }
     else {
-      uuid = NSUUID()
+      uuid = UUID()
     }
-    majorValue = UInt16(aDecoder.decodeIntegerForKey(ItemConstant.majorKey))
-    minorValue = UInt16(aDecoder.decodeIntegerForKey(ItemConstant.minorKey))
+    majorValue = UInt16(aDecoder.decodeInteger(forKey: ItemConstant.majorKey))
+    minorValue = UInt16(aDecoder.decodeInteger(forKey: ItemConstant.minorKey))
   }
   
-  func encodeWithCoder(aCoder: NSCoder) {
-    aCoder.encodeObject(name, forKey: ItemConstant.nameKey)
-    aCoder.encodeObject(uuid, forKey: ItemConstant.uuidKey)
-    aCoder.encodeInteger(Int(majorValue), forKey: ItemConstant.majorKey)
-    aCoder.encodeInteger(Int(minorValue), forKey: ItemConstant.minorKey)
+  func encode(with aCoder: NSCoder) {
+    aCoder.encode(name, forKey: ItemConstant.nameKey)
+    aCoder.encode(uuid, forKey: ItemConstant.uuidKey)
+    aCoder.encode(Int(majorValue), forKey: ItemConstant.majorKey)
+    aCoder.encode(Int(minorValue), forKey: ItemConstant.minorKey)
   }
 }

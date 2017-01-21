@@ -21,64 +21,64 @@ class ItemsViewController: UIViewController {
   }
   
   func loadItems() {
-    if let storedItems = NSUserDefaults.standardUserDefaults().arrayForKey(ItemsViewControllerConstant.storedItemsKey) {
+    if let storedItems = UserDefaults.standard.array(forKey: ItemsViewControllerConstant.storedItemsKey) {
       for itemData in storedItems {
-        let item: Item = NSKeyedUnarchiver.unarchiveObjectWithData(itemData as! NSData) as! Item
+        let item: Item = NSKeyedUnarchiver.unarchiveObject(with: itemData as! Data) as! Item
         items.append(item)
       }
     }
   }
   
   func persistItems() {
-    var itemsDataArray:[NSData] = []
+    var itemsDataArray:[Data] = []
     for item in items {
-      let itemData = NSKeyedArchiver.archivedDataWithRootObject(item)
+      let itemData = NSKeyedArchiver.archivedData(withRootObject: item)
       itemsDataArray.append(itemData)
     }
-    NSUserDefaults.standardUserDefaults().setObject(itemsDataArray, forKey: ItemsViewControllerConstant.storedItemsKey)
+    UserDefaults.standard.set(itemsDataArray, forKey: ItemsViewControllerConstant.storedItemsKey)
   }
   
   // MARK: Unwind Segue actions
-  @IBAction func saveItem(segue: UIStoryboardSegue) {
-    let addItemViewController = segue.sourceViewController as! AddItemViewController
+  @IBAction func saveItem(_ segue: UIStoryboardSegue) {
+    let addItemViewController = segue.source as! AddItemViewController
     if let newItem = addItemViewController.newItem {
       items.append(newItem)
       itemsTableView.beginUpdates()
-      let newIndexPath = NSIndexPath(forRow: items.count-1, inSection: 0)
-      itemsTableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+      let newIndexPath = IndexPath(row: items.count-1, section: 0)
+      itemsTableView.insertRows(at: [newIndexPath], with: .automatic)
       itemsTableView.endUpdates()
       persistItems()
     }
   }
   
-  @IBAction func cancelItem(segue: UIStoryboardSegue) {
+  @IBAction func cancelItem(_ segue: UIStoryboardSegue) {
     // Do nothing
   }
 }
 
 // MARK: UITableViewDataSource
 extension ItemsViewController : UITableViewDataSource {
-  func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return items.count
   }
   
-  func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("Item", forIndexPath: indexPath) as! ItemCell
+  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    let cell = tableView.dequeueReusableCell(withIdentifier: "Item", for: indexPath) as! ItemCell
     let item = items[indexPath.row]
     cell.item = item
     return cell
   }
   
-  func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+  func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
     return true
   }
   
-  func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-    if editingStyle == .Delete {
+  func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    if editingStyle == .delete {
       let itemToRemove = items[indexPath.row] as Item
       tableView.beginUpdates()
-      items.removeAtIndex(indexPath.row)
-      tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+      items.remove(at: indexPath.row)
+      tableView.deleteRows(at: [indexPath], with: .automatic)
       tableView.endUpdates()
       persistItems()
     }
@@ -87,13 +87,13 @@ extension ItemsViewController : UITableViewDataSource {
 
 // MARK: UITableViewDelegate
 extension ItemsViewController: UITableViewDelegate {
-  func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-    tableView.deselectRowAtIndexPath(indexPath, animated: true)
+  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    tableView.deselectRow(at: indexPath, animated: true)
     let item = items[indexPath.row] as Item
-    let uuid = item.uuid.UUIDString
+    let uuid = item.uuid.uuidString
     let detailMessage = "UUID: \(uuid)\nMajor: \(item.majorValue)\nMinor: \(item.minorValue)"
-    let detailAlert = UIAlertController(title: "Details", message: detailMessage, preferredStyle: .Alert)
-    detailAlert.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
-    self.presentViewController(detailAlert, animated: true, completion: nil)
+    let detailAlert = UIAlertController(title: "Details", message: detailMessage, preferredStyle: .alert)
+    detailAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+    self.present(detailAlert, animated: true, completion: nil)
   }
 }
