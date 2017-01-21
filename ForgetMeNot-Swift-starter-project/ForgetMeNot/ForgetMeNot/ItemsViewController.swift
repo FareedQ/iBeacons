@@ -1,4 +1,5 @@
 import UIKit
+import CoreLocation
 
 struct ItemsViewControllerConstant {
   static let storedItemsKey = "storedItems"
@@ -7,11 +8,13 @@ struct ItemsViewControllerConstant {
 class ItemsViewController: UIViewController {
   @IBOutlet weak var itemsTableView: UITableView!
   
+  let locationManager = CLLocationManager()
   var items: [Item] = []
   
   override func viewDidLoad() {
     super.viewDidLoad()
     
+    locationManager.requestAlwaysAuthorization()
     loadItems()
   }
   

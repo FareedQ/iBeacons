@@ -1,4 +1,5 @@
 import Foundation
+import CoreLocation
 
 struct ItemConstant {
   static let nameKey = "name"
@@ -10,10 +11,10 @@ struct ItemConstant {
 class Item: NSObject, NSCoding {
   let name: String
   let uuid: UUID
-  let majorValue: UInt16
-  let minorValue: UInt16
+    let majorValue: CLBeaconMajorValue
+    let minorValue: CLBeaconMinorValue
   
-  init(name: String, uuid: UUID, majorValue: UInt16, minorValue: UInt16) {
+  init(name: String, uuid: UUID, majorValue: CLBeaconMajorValue, minorValue: CLBeaconMajorValue) {
     self.name = name
     self.uuid = uuid
     self.majorValue = majorValue
