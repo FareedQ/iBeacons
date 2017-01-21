@@ -15,6 +15,8 @@ class ItemsViewController: UIViewController {
     super.viewDidLoad()
     
     locationManager.requestAlwaysAuthorization()
+    locationManager.delegate = self
+    
     loadItems()
   }
   
@@ -27,6 +29,7 @@ class ItemsViewController: UIViewController {
     if let storedItems = UserDefaults.standard.array(forKey: ItemsViewControllerConstant.storedItemsKey) {
       for itemData in storedItems {
         let item: Item = NSKeyedUnarchiver.unarchiveObject(with: itemData as! Data) as! Item
+        startMonitoringItem(item)
         items.append(item)
       }
     }
@@ -40,6 +43,26 @@ class ItemsViewController: UIViewController {
     }
     UserDefaults.standard.set(itemsDataArray, forKey: ItemsViewControllerConstant.storedItemsKey)
   }
+    
+    func beaconRegionWithItem(_ item:Item) -> CLBeaconRegion {
+        let beaconRegion = CLBeaconRegion(proximityUUID: item.uuid,
+                                          major: item.majorValue,
+                                          minor: item.minorValue,
+                                          identifier: item.name)
+        return beaconRegion
+    }
+    
+    func startMonitoringItem(_ item: Item) {
+        let beaconRegion = beaconRegionWithItem(item)
+        locationManager.startMonitoring(for: beaconRegion)
+        locationManager.startRangingBeacons(in: beaconRegion)
+    }
+    
+    func stopMonitoringItem(_ item: Item) {
+        let beaconRegion = beaconRegionWithItem(item)
+        locationManager.stopMonitoring(for: beaconRegion)
+        locationManager.stopRangingBeacons(in: beaconRegion)
+    }
   
   // MARK: Unwind Segue actions
   @IBAction func saveItem(_ segue: UIStoryboardSegue) {
@@ -50,6 +73,7 @@ class ItemsViewController: UIViewController {
       let newIndexPath = IndexPath(row: items.count-1, section: 0)
       itemsTableView.insertRows(at: [newIndexPath], with: .automatic)
       itemsTableView.endUpdates()
+      startMonitoringItem(newItem)
       persistItems()
     }
   }
@@ -79,6 +103,7 @@ extension ItemsViewController : UITableViewDataSource {
   func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {
       let itemToRemove = items[indexPath.row] as Item
+      stopMonitoringItem(itemToRemove)
       tableView.beginUpdates()
       items.remove(at: indexPath.row)
       tableView.deleteRows(at: [indexPath], with: .automatic)
@@ -99,4 +124,8 @@ extension ItemsViewController: UITableViewDelegate {
     detailAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
     self.present(detailAlert, animated: true, completion: nil)
   }
+}
+
+// MARK: - CLLocationManagerDelegate
+extension ItemsViewController: CLLocationManagerDelegate {
 }
